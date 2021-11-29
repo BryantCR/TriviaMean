@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <title>Trivia</title>
+    </head>
+    <body>
+        <div class="container-lg border">
+            <header class="d-flex justify-content-between">
+                <a href="./trivia.html">Play Again</a>
+                <h1>
+                    Trivia Night
+                </h1>
+                <div>
+                    <span class="points">
+                        Points
+                    </span>
+                </div>
+            </header>
+            <section class="questions d-flex justify-content-center flex-wrap">
+            <!--
+                Questions goes here
+            -->
+            </section>
+        </div>
+        <script>
+            // https://opentdb.com/api.php?amount=10&category=17&difficulty=easy&type=multiple
+            let state = { points: 0, questions:[]}
+            window.onload = () => getQuestions().then(addListeners)
+
+            async function getQuestions(){
+                const URL = 'https://opentdb.com/api.php?amount=10&category=15&difficulty=easy&type=multiple' // `https://opentdb.com/api.php?amount=10&category=17&difficulty=easy&type=multiple`
+                try {
+                    const response = await fetch(URL)
+                    const data = await response.json()
+                    print(data)
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+
+            function print(data){
+                // console.log(data.results)
+
+                let questions =  "";
+                // const questions = document.querySelector(".questions")
+
+                data.results.forEach((question, index) => {
+                    state.questions.push(question)
+                    const q = `
+                    <div id="${index}" class="card w-25 m-1 border rounded p-3 position-relative ">
+                        <p>${question.question}</p>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" value="  ${question.incorrect_answers[0]}" name="${index}" id="${index}${question.incorrect_answers[0]}">
+                            <label class="form-check-label" for="${index}${question.incorrect_answers[0]}"">
+                            ${question.incorrect_answers[0]}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" value="${question.incorrect_answers[1]}" name="${index}" id="${index}${question.incorrect_answers[1]}">
+                            <label class="form-check-label" for="${index}${question.incorrect_answers[1]}">
+                            ${question.incorrect_answers[1]}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" value="${question.incorrect_answers[2]}" name="${index}" id="${index}${question.incorrect_answers[2]}">
+                            <label class="form-check-label" for="${index}${question.incorrect_answers[2]}">
+                            ${question.incorrect_answers[2]}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" value="${question.correct_answer}" name="${index}" id="${index}${question.correct_answer}">
+                            <label class="form-check-label" for="${index}${question.correct_answer}">
+                            ${question.correct_answer}
+                            </label>
+                        </div>
+                        <div class="bg-primary w-100 position-absolute top-0 bottom-0 start-0 end-0  d-flex flex-column justify-content-center align-items-center  text-white ">
+                            <p>${question.category}</p>
+                            <p>100 points</p>
+                        </div>
+                    </div>`
+                    questions += q;
+                });
+                
+                document.querySelector(".questions").innerHTML += questions
+            }
+
+            function addListeners(){
+                const qs = document.querySelectorAll(".card")
+                Array.from(qs).forEach(q => q.addEventListener("click", eventHandling))
+                console.log(state)
+            }
+
+            function eventHandling(e){
+                console.log(e.target)
+
+                if(e.target.closest("div.bg-primary")){
+                    //  console.log("hi there")
+                    e.target.closest("div.bg-primary").classList.add("d-none")
+                }
+
+                if(e.target.value === state.questions[+e.target.name].correct_answer){
+                    console.log("you win")
+                    const q = e.target.closest("div.card")
+                    q.classList.add("bg-success")
+                    q.classList.add("text-white")
+                    Array.from(q.querySelectorAll('input[type="radio"]')).forEach(input => input.setAttribute("disabled", ""))
+                    state.points += 100
+                    document.querySelector(".points").innerText = state.points + " Points"
+                }else{
+                    const q = e.target.closest("div.card")
+                    q.classList.add("bg-danger")
+                    q.classList.add("text-white")
+                    Array.from(q.querySelectorAll('input[type="radio"]')).forEach(input => input.setAttribute("disabled", ""))
+                }
+            }
+        </script>
+    </body>
+</html>
